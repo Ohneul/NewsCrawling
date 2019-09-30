@@ -44,15 +44,22 @@
     <property name="font">
      <font>
       <family>맑은 고딕</family>
-      <pointsize>14</pointsize>
+      <pointsize>16</pointsize>
      </font>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::StrongFocus</enum>
+    </property>
+    <property name="contextMenuPolicy">
+     <enum>Qt::DefaultContextMenu</enum>
     </property>
     <property name="autoFillBackground">
      <bool>false</bool>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color : rgb(120, 140, 235, 120);
-color:#ffffff</string>
+     <string notr="true">background-color : rgb(255, 255, 255, 110);
+color : #000000;
+border : 0px</string>
     </property>
     <property name="inputMask">
      <string/>
@@ -68,6 +75,9 @@ color:#ffffff</string>
     </property>
     <property name="placeholderText">
      <string>원하는 단어를 입력해주세요.</string>
+    </property>
+    <property name="cursorMoveStyle">
+     <enum>Qt::LogicalMoveStyle</enum>
     </property>
     <property name="clearButtonEnabled">
      <bool>false</bool>
@@ -88,7 +98,7 @@ color:#ffffff</string>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color : rgb(255, 255, 255);
+     <string notr="true">
 </string>
     </property>
     <property name="dateTime">
@@ -144,7 +154,7 @@ color:#ffffff</string>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color : rgb(255, 255, 255);
+     <string notr="true">
 </string>
     </property>
     <property name="dateTime">
@@ -233,7 +243,7 @@ color:#ffffff</string>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color : rgb(120, 140, 235, 80);
+     <string notr="true">background-color : rgb(222, 237, 249, 60);
 color:#000000</string>
     </property>
     <property name="value">
@@ -264,7 +274,7 @@ color:#000000</string>
    <widget class="QPushButton" name="Search">
     <property name="geometry">
      <rect>
-      <x>760</x>
+      <x>700</x>
       <y>230</y>
       <width>51</width>
       <height>51</height>
@@ -313,12 +323,39 @@ color:#ffffff;</string>
       <bold>true</bold>
      </font>
     </property>
+    <property name="focusPolicy">
+     <enum>Qt::StrongFocus</enum>
+    </property>
+    <property name="contextMenuPolicy">
+     <enum>Qt::DefaultContextMenu</enum>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
     <property name="styleSheet">
-     <string notr="true">background-color : rgb(120, 140, 255);
-color:#ffffff;</string>
+     <string notr="true">background-color : rgb(172, 200, 233);
+color:#505050;</string>
     </property>
     <property name="text">
      <string>가공</string>
+    </property>
+    <property name="checkable">
+     <bool>false</bool>
+    </property>
+    <property name="autoRepeat">
+     <bool>false</bool>
+    </property>
+    <property name="autoExclusive">
+     <bool>false</bool>
+    </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+    <property name="default">
+     <bool>false</bool>
+    </property>
+    <property name="flat">
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QComboBox" name="cb_ctgr">
@@ -336,8 +373,7 @@ color:#ffffff;</string>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color : rgb(255, 255, 255);
-</string>
+     <string notr="true">background-color : rgb(255, 255, 255)</string>
     </property>
     <item>
      <property name="text">
@@ -505,7 +541,7 @@ color:#ffffff;</string>
        <string notr="true">background-color : rgb(255, 255, 255, 110)</string>
       </property>
       <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
+       <enum>QFrame::NoFrame</enum>
       </property>
       <property name="readOnly">
        <bool>true</bool>
@@ -533,10 +569,10 @@ p, li { white-space: pre-wrap; }
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color: rgb(255, 255, 255)</string>
+       <string notr="true">background-color : rgb(255, 255, 255, 110)</string>
       </property>
       <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
+       <enum>QFrame::NoFrame</enum>
       </property>
       <property name="text">
        <string/>
@@ -557,10 +593,10 @@ p, li { white-space: pre-wrap; }
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color: rgb(255, 255, 255)</string>
+       <string notr="true">background-color : rgb(255, 255, 255, 110)</string>
       </property>
       <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
+       <enum>QFrame::NoFrame</enum>
       </property>
       <property name="frameShadow">
        <enum>QFrame::Plain</enum>
@@ -580,11 +616,14 @@ p, li { white-space: pre-wrap; }
       <height>850</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">background-color : rgb(255, 255, 255)</string>
+    </property>
     <property name="text">
      <string/>
     </property>
     <property name="pixmap">
-     <pixmap>img/우리배경.png</pixmap>
+     <pixmap>img/Background1_4.png</pixmap>
     </property>
    </widget>
    <zorder>label_9</zorder>
@@ -592,7 +631,6 @@ p, li { white-space: pre-wrap; }
    <zorder>label_3</zorder>
    <zorder>pBar</zorder>
    <zorder>label_4</zorder>
-   <zorder>Search</zorder>
    <zorder>Process</zorder>
    <zorder>label_6</zorder>
    <zorder>label_7</zorder>
@@ -602,6 +640,7 @@ p, li { white-space: pre-wrap; }
    <zorder>cb_ss</zorder>
    <zorder>lineEdit</zorder>
    <zorder>tabWidget</zorder>
+   <zorder>Search</zorder>
   </widget>
  </widget>
  <tabstops>

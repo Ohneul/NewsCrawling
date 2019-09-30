@@ -8,7 +8,8 @@ import sys
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import pytagcloud                   # WordCloud 관련 라이브러리
+import nltk
+import numpy as np                  # ?
 import random; random.seed(0)       # WordCloud 단어 색깔 관련 라이브러리
 from PyQt5.QtWidgets import *       # PYQT(폼) 라이브러리
 from PyQt5 import uic, QtCore
@@ -17,7 +18,10 @@ from datetime import datetime       # 날짜 관련 라이브러리
 from bs4 import BeautifulSoup       # 크롤링 관련 라이브러리
 from matplotlib import font_manager # 폰트 관련 라이브러리
 from konlpy.tag import Okt          # 오픈 소스 한국어 분석기
-from collections import Counter
+from PIL import Image               # 이미지의 마스킹 데이터를 가져오는 라이브러리
+from wordcloud import WordCloud     # 워드클라우드 라이브러리
+from wordcloud import STOPWORDS     # 워드클라우드 제외 단어 라이브러리
+from wordcloud import ImageColorGenerator
 # UI 파일 로드
 form_class = uic.loadUiType("news_crawling.ui")[0]
 ss_dict = {'청와대':'sid1=100&sid2=264', '국회/정당':'sid1=100&sid2=265', '북한':'sid1=100&sid2=268', '행정':'sid1=100&sid2=266'
@@ -39,7 +43,8 @@ crawlword = ''  # 크롤링을 할 단어를 저장하는 변수
 s_date = []     # 시작하는 날짜
 e_date = []     # 끝나는 날짜
 fname = []
-cloudImagePath = ''
+stop_words = []
+image_File = ''
 # Thread part===========================================================================================================================================
 class CrawlingThread(QtCore.QThread):   # 수집 기능 스레드화
     def __init__(self, parent=None):
@@ -53,10 +58,10 @@ class ProcessingThread(QtCore.QThread): # 가공 기능 스레드화
     def run(self):
         MyWindow.datacode(self)
         self.quit()
-        pixmap = QPixmap('chart.png')
+        pixmap = QPixmap('Png_' + image_File)
         myWindow.label_5.setPixmap(pixmap)
-        pixmap2 = QPixmap(cloudImagePath)
-        myWindow.label.setPixmap(pixmap2)
+        pixmap1 = QPixmap(image_File)
+        myWindow.label.setPixmap(pixmap1)
 # UI part===============================================================================================================================================
 class MyWindow(QMainWindow, form_class):
     # UI의 기능을 추가 및 연결하는 함수
@@ -251,28 +256,53 @@ class MyWindow(QMainWindow, form_class):
         myWindow.Search.setEnabled(True)
         myWindow.Process.setEnabled(True)
     # 수집한 자료를 그래프로 표기하는 함수
-    def showChart(wordInfo):
-        font_location = "C:\Windows\Fonts\malgun.ttf"
+    def showChart(wordInfo, filename):
+        print('Chart')
+        font_location = "C:/WINDOWS/Fonts/malgun.ttf"
         font_name = font_manager.FontProperties(fname=font_location).get_name()
         matplotlib.rc('font', family=font_name)
-        plt.rcParams["figure.figsize"] = (14, 4)
+        plt.rcParams.update({'font.size': 7})
+        plt.rcParams["figure.figsize"] = (8, 4)
         plt.xlabel('주요 단어')
         plt.ylabel('빈도수')
         plt.grid(True)
         Sorted_Dict_Values = sorted(wordInfo.values(), reverse=True)
         Sorted_Dict_Keys = sorted(wordInfo, key=wordInfo.get, reverse=True)
         plt.bar(range(len(wordInfo)), Sorted_Dict_Values, align='center')
-        plt.xticks(range(len(wordInfo)), list(Sorted_Dict_Keys), rotation='70')
+        plt.xticks(range(len(wordInfo)), list(Sorted_Dict_Keys), rotation='55')
         fig = plt.gcf()
+        fig.savefig('Png_' + filename)
         plt.close()
-        fig.savefig('chart.png')
     # WordCloud 그리기 함수
     def saveWordCloud(wordInfo, filename):
-        taglist = pytagcloud.make_tags(dict(wordInfo).items(), maxsize=72)
-        pytagcloud.create_tag_image(taglist, filename, size=(600, 400), fontname='OldBath-Bold', rectangular=False, layout=4)
+        print('WordCloud')
+        cloudShape = np.array(Image.open('cloudShape.png'))  # 모양 틀 가져오기 (없을 시 직사각형)
+        image_colors = ImageColorGenerator(cloudShape)
+        stopwords = set(STOPWORDS)  # 제외 할 단어 셋팅
+        stopwords.add('said')  # 제외 할 단어 추가
+        wordcloud = WordCloud(
+            font_path='C:/Users/zv961/AppData/Local/Microsoft/Windows/Fonts/OldBath.ttf',   # 폰트
+            width=1400,                 # 워드 클라우드 사이즈(픽셀)
+            height=700,                 # 워드 클라우드 사이즈(픽셀)
+            background_color='white',   # 배경색
+            max_font_size=300,          # 가장 큰 단어 폰트 사이즈
+            min_font_size=15,           # 가장 작은 단어 폰트 사이즈
+            margin=17,                  # 단어 간 간격
+            max_words=500,              # 워드 클라우드에 들어갈 단어 수
+            stopwords=stopwords,        # 제외 단어
+            colormap='tab20',
+            random_state=1
+            # mask=cloudShape           # 워드 클라우드 틀
+        ).generate_from_frequencies(wordInfo)  # 워드 클라우드 생성
+        fig = plt.figure(figsize=(8, 4))  # 워드 클라우드 사이즈(인치)
+        plt.imshow(wordcloud, interpolation='bilinear')  # 워드 클라우드 이미지화
+        plt.axis('off')  # 워드 클라우드 이미지상 사이즈 표기 여부
+        fig.savefig(filename)
+        plt.close()
     # 가공
     def datacode(self):
-        global cloudImagePath
+        global image_File
+        global stop_words
         filename = fname[0].split('/')
         f_stack = len(filename)
         taglist = filename[-1].split('_')
@@ -280,45 +310,53 @@ class MyWindow(QMainWindow, form_class):
         barValue = 0
         myWindow.pBar.setValue(barValue)
         myWindow.pBar.setMaximum(100)
-        with open(filename[f_stack-1], 'rt', encoding='utf-8') as rfile:
-            with open('Processing_' + filename[f_stack-1], 'w', newline='') as wfile:
+        with open(filename[f_stack - 1], 'rt', encoding='utf-8') as rfile:
+            with open('Processing_' + filename[f_stack - 1], 'w', newline='') as wfile:
                 cw = csv.writer(wfile)
                 r = csv.reader(rfile)
                 for row in r:
                     result_News = ''
+                    check = 0
                     for c in row[3]:
-                        if ord('가') <= ord(c) <= ord('힣') or c.isdigit() or ord('A') <= ord(c) <= ord('z') or ord(c) == ord(' '):
-                            result_News += c
-                        else:
-                            result_News += ' '
-                    print(result_News)
+                        if ord('[') == ord(c):
+                            check = 1
+                        elif ord(']') == ord(c):
+                            check = 0
+                            continue
+                        if check == 0:
+                            if ord('가') <= ord(c) <= ord('힣') or c.isdigit() or ord('A') <= ord(c) <= ord('z') \
+                                    or ord(c) == ord(' '):
+                                result_News += c
+                            else:
+                                result_News += ' '
                     cw.writerow([result_News])
         barValue = 10
         myWindow.pBar.setValue(barValue)
-        cloudImagePath = 'Processing_' + filename[f_stack-1] + '.png'
-        with open('Processing_' + filename[f_stack-1], 'r') as f:
+        image_File = 'Processing_' + filename[f_stack - 1] + '.png'
+        with open('Processing_' + filename[f_stack - 1], 'r') as f:
             text = f.read()
         okt = Okt()
-        barValue = 30
+        barValue = 20
         myWindow.pBar.setValue(barValue)
         nouns = okt.nouns(text)
-        barValue = 60
+        barValue = 80
         myWindow.pBar.setValue(barValue)
-        count = Counter(nouns)
-        wordInfo = dict()
-        for tags, counts in count.most_common(75):
-            if len(str(tags)) > 1:
-                if tags == "뉴스" or tags == "금지" or tags == "제공" or tags == "무단" or tags == "전재"\
-                    or tags == "배포" or tags == "기자" or tags == "구독" or tags == "뉴시스" or tags == "연합뉴스"\
-                    or tags == "사진" or tags == "저작권" or tags == "라며" or tags == "디스패치" or tags == "노컷뉴스"\
-                    or tags == "한국영" or tags == "네이버" or tags == searchtext: # 검색할 필요가 없는 단어
-                    continue
-                wordInfo[tags] = counts
-                print("%s : %d" % (tags, counts))
+        stop_words = [
+            searchtext, '뉴스', '금지', '제공', '무단', '전재', '배포', '기자', '구독', '뉴시스', '연합뉴스',
+            '사진', '저작권', '라며', '디스패치', '노컷뉴스', '네이버', '생방송투데이', '매일신문'
+        ]
+        nouns = [each_word for each_word in nouns if each_word not in stop_words and len(str(each_word)) > 1]
+        nns = nltk.Text(nouns, name='process_')
+        wordChart = dict(nns.vocab().most_common(30))
+        wordInfo = dict(nns.vocab().most_common(400))
+        barValue = 85
+        myWindow.pBar.setValue(barValue)
+        MyWindow.showChart(wordChart, image_File)
+        barValue = 90
+        myWindow.pBar.setValue(barValue)
+        MyWindow.saveWordCloud(wordInfo, image_File)
         barValue = 100
         myWindow.pBar.setValue(barValue)
-        MyWindow.showChart(wordInfo)
-        MyWindow.saveWordCloud(wordInfo, cloudImagePath)
         myWindow.Search.setEnabled(True)
         myWindow.Process.setEnabled(True)
 # Form Part=============================================================================================================================================
